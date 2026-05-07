@@ -2,7 +2,10 @@ import axios from "axios";
 
 export const createLead = async (payload: any) => {
   try {
-    const { data } = await axios.post("/api/leads", payload);
+    const { data } = await axios.post(
+      "https://coupon-based-lead-form-api-1.onrender.com/api/leads",
+      payload,
+    );
     return data;
   } catch (error: any) {
     const message =
@@ -15,7 +18,9 @@ export const createLead = async (payload: any) => {
 
 export const getLeads = async () => {
   try {
-    const { data } = await axios.get("/api/leads");
+    const { data } = await axios.get(
+      "https://coupon-based-lead-form-api-1.onrender.com/api/leads",
+    );
     return data;
   } catch (error: any) {
     const message =
