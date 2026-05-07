@@ -1,32 +1,53 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 import { createLead } from "../services/lead.api";
 import { useCoupon } from "../hooks/useCoupon";
-import { leadFormSchema, type LeadFormData } from "../types/form.schema";
+import { leadFormSchema } from "../types/form.schema";
+import { type RequirementType } from "../constants";
+
+type FormValues = {
+  name: string;
+  phone: string;
+  email: string;
+  city: string;
+  requirementType: RequirementType;
+  budgetRange: string;
+  message?: string;
+  couponCode?: string;
+};
 
 export const useLeadForm = () => {
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
-  const form = useForm<LeadFormData>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(leadFormSchema),
     defaultValues: {
       name: "",
       phone: "",
       email: "",
       city: "",
-      requirementType: "Product",
+      requirementType: "Service",
       budgetRange: "",
       message: "",
       couponCode: "",
     },
   });
 
-  const requirementType = form.watch("requirementType");
-  const budgetRange = form.watch("budgetRange");
-  const email = form.watch("email");
-  const couponCode = form.watch("couponCode");
+  // Watch form values
+  const requirementType = watch("requirementType");
+  const budgetRange = watch("budgetRange");
+  const email = watch("email");
+  const couponCode = watch("couponCode");
 
   const {
     discountAmount,
@@ -36,41 +57,63 @@ export const useLeadForm = () => {
     clearCoupon,
   } = useCoupon(requirementType, budgetRange, email);
 
+  // Apply Coupon
   const handleApplyCoupon = async () => {
-    if (couponCode) {
-      await applyCoupon(couponCode);
-    }
+    await applyCoupon(couponCode);
   };
 
-  const onSubmit = async (data: LeadFormData) => {
+  // Submit Form
+  const onSubmit = async (data: FormValues) => {
     try {
       setLoading(true);
-      setSubmitError(null);
+      setSubmitError("");
 
       await createLead({
         ...data,
         budgetRange: Number(data.budgetRange),
       });
 
-      alert("Lead submitted successfully");
+      setIsSubmitted(true);
 
-      form.reset();
+      reset({
+        name: "",
+        phone: "",
+        email: "",
+        city: "Chennai",
+        requirementType: "Service",
+        budgetRange: "1000",
+        message: "",
+        couponCode: "",
+      });
+
       clearCoupon();
     } catch (err: any) {
-      setSubmitError(err.message || "Submission failed");
+      setSubmitError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return {
-    form,
+    form: {
+      register,
+      handleSubmit,
+      formState: {
+        errors,
+      },
+    },
+
     loading,
+    isSubmitted,
     submitError,
+
     discountAmount,
     finalPrice,
     couponError,
+
     handleApplyCoupon,
     onSubmit,
+
+    resetStatus: () => setIsSubmitted(false),
   };
 };

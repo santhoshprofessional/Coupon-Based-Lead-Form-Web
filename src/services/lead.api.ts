@@ -1,10 +1,27 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const createLead = async (payload: any) => {
   try {
-    const response = await axios.post('/api/leads', payload);
-    return response.data;
+    const { data } = await axios.post("/api/leads", payload);
+    return data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Failed to submit lead');
+    const message =
+      error?.response?.data?.message ||
+      error.message ||
+      "Failed to submit lead";
+    throw new Error(message);
+  }
+};
+
+export const getLeads = async () => {
+  try {
+    const { data } = await axios.get("/api/leads");
+    return data;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error.message ||
+      "Failed to fetch leads";
+    throw new Error(message);
   }
 };

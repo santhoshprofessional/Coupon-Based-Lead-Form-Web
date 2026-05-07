@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const validateCouponApi = async (payload: {
   couponCode: string;
@@ -7,9 +7,11 @@ export const validateCouponApi = async (payload: {
   email: string;
 }) => {
   try {
-    const response = await axios.post('/api/coupons/validate', payload);
-    return response.data;
+    const { data } = await axios.post("/api/coupons/validate", payload);
+    return data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Invalid coupon');
+    const message =
+      error?.response?.data?.message || error.message || "Invalid coupon";
+    throw new Error(message);
   }
 };
