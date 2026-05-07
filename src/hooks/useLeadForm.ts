@@ -59,7 +59,7 @@ export const useLeadForm = () => {
 
   // Apply Coupon
   const handleApplyCoupon = async () => {
-    await applyCoupon(couponCode);
+    await applyCoupon(couponCode || "");
   };
 
   // Submit Form
